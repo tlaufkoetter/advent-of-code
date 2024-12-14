@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace TwentyTwentyFour;
 
 public class DayOne
