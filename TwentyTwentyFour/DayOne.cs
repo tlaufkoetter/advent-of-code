@@ -7,13 +7,17 @@ public class DayOne
     static public (List<long>, List<long>) GetLists()
     {
         var lines = File.ReadAllLines("../../../DayOneInput.txt");
-        var unsortedPairs = lines
+        return lines
             .Select(line => line.Split(' ', 2)
                 .Select(part => part.Trim())
                 .Select(long.Parse))
-            .Select(parts => KeyValuePair.Create(parts.First(), parts.Last()))
-            .ToDictionary();
-        return ([.. unsortedPairs.Keys], [.. unsortedPairs.Values]);
+            .Select(parts => (parts.First(), parts.Last()))
+            .Aggregate((new List<long>(), new List<long>()), (agg, p) =>
+            {
+                agg.Item1.Add(p.Item1);
+                agg.Item2.Add(p.Item2);
+                return agg;
+            });
     }
     static public long GetDistance()
     {
