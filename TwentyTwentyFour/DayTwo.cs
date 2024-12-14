@@ -12,8 +12,9 @@ public class DayTwo
             .ToArray();
     }
 
-    public static bool IsSafe(long[] values, Func<long[], bool>[] predicates)
+    public static bool IsSafe(long[] values)
     {
+        Func<long[], bool>[] predicates = [IsMonotonous, IsCorrectSlope];
         return predicates.All(prediacte => prediacte(values));
     }
 
@@ -36,8 +37,8 @@ public class DayTwo
 
     public static bool IsCorrectSlope(long[] values)
     {
-        var diffs = values.SkipLast(1).Zip(values.Skip(1)).Select(p => p.First - p.Second).Select(Math.Abs).ToArray();
-        Func<long[], bool>[] bounds = [vals => vals.All(v => v <= 3), vals => vals.All(v => v >= 1)];
+        var diffs = values.SkipLast(1).Zip(values.Skip(1)).Select(p => p.First - p.Second).Select(Math.Abs);
+        Func<IEnumerable<long>, bool>[] bounds = [vals => vals.All(v => v <= 3), vals => vals.All(v => v >= 1)];
         var result = bounds.All(bound => bound(diffs));
         return result;
     }
@@ -46,6 +47,17 @@ public class DayTwo
     public void Part1()
     {
         var lines = GetLines();
-        Assert.Equal(332, lines.Where(line => IsSafe(line, [IsMonotonous, IsCorrectSlope])).Count());
+        Assert.Equal(332, lines.Where(IsSafe).Count());
+    }
+
+    [Fact]
+    public void Part2()
+    {
+        var lines = GetLines();
+        var dampenedLines = lines
+            .Select(line => Enumerable.Range(0, line.Length)
+                .Select(i => line.Take(i).Concat(line.TakeLast(line.Length - 1 - i))
+                .ToArray()));
+        Assert.Equal(398, dampenedLines.Where(damps => damps.Where(IsSafe).Any()).Count());
     }
 }
