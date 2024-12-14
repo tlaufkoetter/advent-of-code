@@ -2,16 +2,32 @@ namespace TwentyTwentyFour;
 
 public class DaySeven
 {
+
+    static long Add(long a, long b)
+    {
+        return a + b;
+    }
+
+    static long Mult(long a, long b)
+    {
+        return a * b;
+    }
+
+    static long Concat(long a, long b)
+    {
+        return long.Parse($"{a}{b}");
+    }
+
     record Equation(long Result, long[] Coefficients);
-    [Fact]
-    public void BranchlessFoldLeft()
+
+
+    public long BranchlessFoldLeft(Func<long, long, long>[] operands)
     {
         var lines = File.ReadAllLines("../../../DaySevenInput.txt");
         var equations = lines
             .Select(ParseEquation)
             .Where(HasSolution);
-        var solution = AggregateSolutions(equations);
-        Assert.Equal(663613490587, solution);
+        return AggregateSolutions(equations);
 
         Equation ParseEquation(string line)
         {
@@ -32,20 +48,9 @@ public class DaySeven
             return equation with { Result = operand(equation.Result, equation.Coefficients.First()), Coefficients = equation.Coefficients.Skip(1).ToArray() };
         }
 
-        long Add(long a, long b)
-        {
-            return a + b;
-        }
-
-        long Mult(long a, long b)
-        {
-            return a * b;
-        }
-
 
         IEnumerable<long> CalculateSolutions(Equation equation)
         {
-            Func<long, long, long>[] operands = [Add, Mult];
             var firsts = equation.Coefficients.Take(1).ToArray();
             return new long[] { equation.Result }.Take(Math.Abs(firsts.Length - 1))
                 .Concat(firsts.SelectMany(_ => operands.SelectMany(operand => CalculateSolutions(Advance(equation, operand)))));
@@ -55,5 +60,17 @@ public class DaySeven
         {
             return CalculateSolutions(Advance(equation with { Result = 0 }, Add)).Contains(equation.Result);
         }
+    }
+
+    [Fact]
+    public void Part1()
+    {
+        Assert.Equal(663613490587, BranchlessFoldLeft([Add, Mult]));
+    }
+
+    [Fact]
+    public void Part2()
+    {
+        Assert.Equal(110365987435001, BranchlessFoldLeft([Add, Mult, Concat]));
     }
 }
