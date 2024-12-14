@@ -2,27 +2,8 @@ using System.Text.RegularExpressions;
 
 namespace TwentyTwentyFour;
 
-public static class PointExtensions
-{
-    public static DayEight.Point Add(this DayEight.Point a, DayEight.Point b)
-    {
-        return new DayEight.Point(a.X + b.X, a.Y + b.Y);
-    }
-
-    public static DayEight.Point Sub(this DayEight.Point a, DayEight.Point b)
-    {
-        return new DayEight.Point(a.X - b.X, a.Y - b.Y);
-    }
-
-    public static DayEight.Point Div(this DayEight.Point a, int i)
-    {
-        return new DayEight.Point(a.X / i, a.Y / i);
-    }
-}
-
 public class DayEight
 {
-    public record Point(int X, int Y);
     public record Antenna(char Frequency, Point Coordinates);
     private static Antenna[] GetMap()
     {
