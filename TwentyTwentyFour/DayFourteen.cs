@@ -27,13 +27,17 @@ public class DayFourteen
 
     public static long CalculateSafetyFactor(IEnumerable<Robot> robots)
     {
-        var snapshot = robots.ToList();
         var xLine = map.X / 2;
         var yLine = map.Y / 2;
-        return snapshot.Where(robot => robot.Position.X < xLine).Where(robot => robot.Position.Y < yLine).Count()
-            * snapshot.Where(robot => robot.Position.X > xLine).Where(robot => robot.Position.Y < yLine).Count()
-            * snapshot.Where(robot => robot.Position.X < xLine).Where(robot => robot.Position.Y > yLine).Count()
-            * snapshot.Where(robot => robot.Position.X > xLine).Where(robot => robot.Position.Y > yLine).Count();
+        return robots
+            .Select(robot => robot.Position)
+            .GroupBy(position => Math.Abs(position.X.CompareTo(xLine) * position.Y.CompareTo(yLine))
+                * (1
+                    | (position.X.CompareTo(xLine).CompareTo(-1) << 1)
+                    | (position.Y.CompareTo(yLine).CompareTo(-1) << 2)))
+            .OrderByDescending(group => group.Key)
+            .Take(4)
+            .Aggregate(1, (agg, group) => agg * group.Count());
     }
 
 
