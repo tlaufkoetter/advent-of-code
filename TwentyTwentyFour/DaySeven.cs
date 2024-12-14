@@ -53,7 +53,7 @@ public class DaySeven
 
         bool HasSolution(Equation equation)
         {
-            return CalculateSolutions(Advance(equation with { Result = 0 }, Add)).Any(solution => solution == equation.Result);
+            return CalculateSolutions(Advance(equation with { Result = 0 }, Add)).Contains(equation.Result);
         }
     }
 }
