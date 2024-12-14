@@ -19,14 +19,14 @@ public class DayEight
         return Enumerable.Range(0, times)
             .Aggregate(
                 new List<Point>() { start }.AsEnumerable(),
-                (agg, _) => agg.Append(agg.Last().Add(direction))).Skip(1.CompareTo(times) + 1);
+                (agg, _) => agg.Append(agg.Last() + direction)).Skip(1.CompareTo(times) + 1);
 
     }
     private static IEnumerable<Point> GetAntinodes((Point, Point) pair, int countPerDirection)
     {
         var (pointA, pointB) = pair;
-        var vector = pointB.Sub(pointA);
-        var extrude = (Point start, int flip = 1) => Extrude(start, vector.Div(flip), countPerDirection);
+        var vector = pointB - pointA;
+        var extrude = (Point start, int flip = 1) => Extrude(start, vector / flip, countPerDirection);
         return extrude(pointB).Concat(extrude(pointA, -1));
     }
 

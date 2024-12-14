@@ -1,23 +1,25 @@
 namespace TwentyTwentyFour;
-public record Point(int X, int Y);
-public static class PointExtensions
+public readonly struct Point(long x, long y)
 {
-    public static Point Add(this Point a, Point b)
+    public long X { get; } = x;
+    public long Y { get; } = y;
+
+    public static Point operator +(Point a, Point b)
     {
         return new Point(a.X + b.X, a.Y + b.Y);
     }
 
-    public static Point Sub(this Point a, Point b)
+    public static Point operator -(Point a, Point b)
     {
         return new Point(a.X - b.X, a.Y - b.Y);
     }
 
-    public static Point Div(this Point a, int i)
+    public static Point operator /(Point a, long i)
     {
         return new Point(a.X / i, a.Y / i);
     }
 
-    public static Point Mul(this Point a, int i)
+    public static Point operator *(Point a, long i)
     {
         return new Point(a.X * i, a.Y * i);
     }
