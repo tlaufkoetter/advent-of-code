@@ -52,8 +52,11 @@ public class DaySeven
         IEnumerable<long> CalculateSolutions(Equation equation)
         {
             var firsts = equation.Coefficients.Take(1).ToArray();
-            return new long[] { equation.Result }.Take(Math.Abs(firsts.Length - 1))
-                .Concat(firsts.SelectMany(_ => operands.SelectMany(operand => CalculateSolutions(Advance(equation, operand)))));
+            return firsts
+                .SelectMany(_ => operands.SelectMany(operand => CalculateSolutions(Advance(equation, operand))))
+                .Prepend(equation.Result)
+                .Skip(firsts.Length);
+
         }
 
         bool HasSolution(Equation equation)

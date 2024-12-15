@@ -4,16 +4,6 @@ namespace TwentyTwentyFour.Day06;
 
 public static class Extensions
 {
-    public static IEnumerable<TResult> AsRange<TResult>(this Func<TResult, TResult> transform, TResult seed, int count)
-    {
-        var current = seed;
-        return Enumerable.Repeat(false, count).Select(_ =>
-        {
-            current = transform(current);
-            return current;
-        });
-    }
-
     public static IEnumerable<TSource> TakeWhileIncluding<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
     {
         var enumerator = source.GetEnumerator();
@@ -75,9 +65,8 @@ public class DaySix
         var originalPath = GetPositions(input).Where(pos => !input.Guard.Position.Equals(pos.Position)).Distinct().ToList();
         var circularPaths = originalPath
             .Select(guard => guard.Position)
-            .Select((extraObstacle, i) => (extraObstacle, i))
-            .DistinctBy(p => p.extraObstacle)
-            .Select((pair, i) => GetPositions(input with { Obstacles = [.. input.Obstacles, pair.extraObstacle] })
+            .Distinct()
+            .Select(extraObstacle => GetPositions(input with { Obstacles = [.. input.Obstacles, extraObstacle] })
                 .ToList())
             .Where(path => path.Count > path.Distinct().Count())
             .Select(p => p.ToHashSet())
@@ -96,7 +85,7 @@ public class DaySix
                     currentGuard.Rotate(),
                 }[Convert.ToInt16(input.Obstacles.Contains(currentGuard.Move().Position))])
             .AsRange(guard, (int)(input.MapDimensions.X * input.MapDimensions.Y))
-            .TakeWhile(guard => Math.Min(1, Math.Max(0, 1 + Math.Min(guard.Position.CompareTo(new Point(-1, -1)), mapDimensions.CompareTo(guard.Position)))) == 1)
+            .TakeWhile(guard => Math.Min(1, Math.Max(0, 1 + Math.Min(guard.Position.CompareTo(new Point(0, 0)), mapDimensions.CompareTo(guard.Position)))) == 1)
             .TakeWhileIncluding(visited.Add);
     }
 }

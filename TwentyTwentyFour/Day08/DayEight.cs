@@ -17,10 +17,9 @@ public class DayEight
     }
     private static IEnumerable<Point> Extrude(Point start, Point direction, int times)
     {
-        return Enumerable.Range(0, times)
-            .Aggregate(
-                new List<Point>() { start }.AsEnumerable(),
-                (agg, _) => agg.Append(agg.Last() + direction)).Skip(1.CompareTo(times) + 1);
+        return new Func<Point, Point>(previous => previous + direction)
+            .AsRange(start, times)
+            .Skip(1.CompareTo(times) + 1);
 
     }
     private static IEnumerable<Point> GetAntinodes((Point, Point) pair, int countPerDirection)

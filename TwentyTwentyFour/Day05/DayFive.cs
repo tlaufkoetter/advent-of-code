@@ -64,10 +64,12 @@ public class DayFive
     private static IEnumerable<int> Sort(HashSet<(int, int)> rules, List<int> update)
     {
         var first = update.Where((before, i) => update.Skip(i + 1).All(after => !rules.Contains((after, before)))).First();
-        return new List<int> { first }.Concat(new Func<List<int>>[] { () => [], () => Sort(rules, update.Where(page => page != first).ToList()).ToList() }.Skip(update.Count.CompareTo(1)).First()());
+        return update.Skip(1).Take(1)
+            .SelectMany(_ => Sort(rules, update.Where(page => page != first).ToList()))
+            .Prepend(first);
     }
 
-    private static IEnumerable<int[]> GetInvalidSorted(HashSet<(int, int)> rules, IEnumerable<int[]> updates)
+    private static int[][] GetInvalidSorted(HashSet<(int, int)> rules, IEnumerable<int[]> updates)
     {
         var result = updates.Where(update => IsInvalid(rules, update)).Select(update => Sort(rules, [.. update]).ToArray()).ToArray();
         return result;
