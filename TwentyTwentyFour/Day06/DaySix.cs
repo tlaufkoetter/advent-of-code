@@ -2,12 +2,13 @@ namespace TwentyTwentyFour;
 
 public static class DaySixExtensions
 {
-    public static IEnumerable<TResult> AsRange<TResult>(this Func<TResult, TResult> source, TResult seed, int count)
+    public static IEnumerable<TResult> AsRange<TResult>(this Func<TResult, TResult> transform, TResult seed, int count)
     {
+        var current = seed;
         return Enumerable.Repeat(false, count).Select(_ =>
         {
-            seed = source(seed);
-            return seed;
+            current = transform(current);
+            return current;
         });
     }
 
@@ -56,16 +57,16 @@ public class DaySix
     }
 
     [Theory]
-    [InlineData(["../../../DaySixExample.txt", 41])]
-    [InlineData(["../../../DaySixInput.txt", 5080])]
+    [InlineData(["../../../Day06/DaySixExample.txt", 41])]
+    [InlineData(["../../../Day06/DaySixInput.txt", 5080])]
     public void Part1(string inputFile, int expected)
     {
         Assert.Equal(expected, GetPositions(GetInput(inputFile)).Select(point => point.Position).Distinct().Count());
     }
 
     [Theory]
-    [InlineData(["../../../DaySixExample.txt", 6])]
-    [InlineData(["../../../DaySixInput.txt", 1919])]
+    [InlineData(["../../../Day06/DaySixExample.txt", 6])]
+    [InlineData(["../../../Day06/DaySixInput.txt", 1919])]
     public void Part2(string inputFile, int expected)
     {
         var input = GetInput(inputFile);

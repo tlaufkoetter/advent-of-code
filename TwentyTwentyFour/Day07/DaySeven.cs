@@ -23,7 +23,7 @@ public class DaySeven
 
     public long BranchlessFoldLeft(Func<long, long, long>[] operands)
     {
-        var lines = File.ReadAllLines("../../../DaySevenInput.txt");
+        var lines = File.ReadAllLines("../../../Day07/DaySevenInput.txt");
         var equations = lines
             .Select(ParseEquation)
             .Where(HasSolution);

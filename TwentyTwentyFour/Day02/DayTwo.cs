@@ -7,7 +7,7 @@ public class DayTwo
 {
     public static long[][] GetLines()
     {
-        return File.ReadAllLines("../../../DayTwoInput.txt")
+        return File.ReadAllLines("../../../Day02/DayTwoInput.txt")
             .Select(line => line.Split(' ').Select(long.Parse).ToArray())
             .ToArray();
     }

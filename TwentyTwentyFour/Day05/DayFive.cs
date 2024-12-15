@@ -28,8 +28,8 @@ public class DayFive
         );
     }
 
-    private static (HashSet<(int, int)>, int[][]) GetExampleInput() => GetInput("../../../DayFiveExample.txt");
-    private static (HashSet<(int, int)>, int[][]) GetChallengeInput() => GetInput("../../../DayFiveInput.txt");
+    private static (HashSet<(int, int)>, int[][]) GetExampleInput() => GetInput("../../../Day05/DayFiveExample.txt");
+    private static (HashSet<(int, int)>, int[][]) GetChallengeInput() => GetInput("../../../Day05/DayFiveInput.txt");
 
     private static bool IsInvalid(HashSet<(int, int)> rules, int[] update) => !IsValid(rules, update);
     private static bool IsValid(HashSet<(int, int)> rules, int[] update)

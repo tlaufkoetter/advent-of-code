@@ -7,7 +7,7 @@ public class DayFour
 {
     private static char[][] GetGrid()
     {
-        return File.ReadAllLines("../../../DayFourInput.txt")
+        return File.ReadAllLines("../../../Day04/DayFourInput.txt")
             .Select(line => line.ToArray())
             .ToArray();
     }

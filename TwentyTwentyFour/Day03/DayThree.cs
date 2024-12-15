@@ -6,7 +6,7 @@ public class DayThree
 {
     static public string GetText()
     {
-        return File.ReadAllText("../../../DayThreeInput.txt");
+        return File.ReadAllText("../../../Day03/DayThreeInput.txt");
     }
 
     [Fact]

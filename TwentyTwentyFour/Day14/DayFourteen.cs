@@ -14,7 +14,7 @@ public class DayFourteen
 
     public static IEnumerable<Robot> GetRobots()
     {
-        return File.ReadAllLines("../../../DayFourteenInput.txt")
+        return File.ReadAllLines("../../../Day14/DayFourteenInput.txt")
             .Select(line => Regex.Match(line, @"p=(\d+),(\d+) v=(-?\d+),(-?\d+)"))
             .Select(match => new Robot(new Point(Parse(match, 1), Parse(match, 2)), new Point(Parse(match, 3), Parse(match, 4))));
     }

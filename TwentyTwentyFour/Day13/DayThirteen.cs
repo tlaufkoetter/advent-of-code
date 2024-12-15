@@ -15,7 +15,7 @@ public class DayThirteen
 
     static IEnumerable<Machine> GetMachines()
     {
-        return File.ReadAllText("../../../DayThirteenInput.txt")
+        return File.ReadAllText("../../../Day13/DayThirteenInput.txt")
             .Split("\n\n")
             .Select(chunk =>
             {

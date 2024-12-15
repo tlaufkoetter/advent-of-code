@@ -4,7 +4,7 @@ public class DayOne
 {
     static public (List<long>, List<long>) GetLists()
     {
-        var lines = File.ReadAllLines("../../../DayOneInput.txt");
+        var lines = File.ReadAllLines("../../../Day01/DayOneInput.txt");
         return lines
             .Select(line => line.Split(' ', 2)
                 .Select(part => part.Trim())

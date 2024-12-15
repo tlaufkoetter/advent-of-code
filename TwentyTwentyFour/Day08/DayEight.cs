@@ -7,7 +7,7 @@ public class DayEight
     public record Antenna(char Frequency, Point Coordinates);
     private static Antenna[] GetMap()
     {
-        return File.ReadAllLines("../../../DayEightInput.txt")
+        return File.ReadAllLines("../../../Day08/DayEightInput.txt")
             .SelectMany((line, y) => line
                 .Select((c, x) => new Antenna(c, new Point(x, y))))
                 .Where(antenna => Regex.IsMatch($"{antenna.Frequency}", @"[a-zA-Z0-9]"))
