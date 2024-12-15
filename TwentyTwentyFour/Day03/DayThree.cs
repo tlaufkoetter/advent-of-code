@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Day03;
 
 public class DayThree
 {

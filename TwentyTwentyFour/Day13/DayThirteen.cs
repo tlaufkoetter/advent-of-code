@@ -1,8 +1,7 @@
-using System.Runtime.Intrinsics.X86;
 using System.Text.RegularExpressions;
-using Microsoft.VisualBasic;
+using TwentyTwentyFour.Utils;
 
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Day13;
 
 public record Machine(Point ButtonA, Point ButtonB, Point Prize);
 

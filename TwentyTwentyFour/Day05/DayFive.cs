@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Data;
 
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Day05;
 
 public class DayFive
 {

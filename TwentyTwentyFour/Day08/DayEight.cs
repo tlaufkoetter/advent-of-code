@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
+using TwentyTwentyFour.Utils;
 
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Day08;
 
 public class DayEight
 {

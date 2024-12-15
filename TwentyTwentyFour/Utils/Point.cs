@@ -1,4 +1,4 @@
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Utils;
 public readonly struct Point(long x, long y) : IComparable<Point>
 {
     public long X { get; } = x;

@@ -1,4 +1,4 @@
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Utils;
 
 public readonly struct Fraction
 {
@@ -35,7 +35,7 @@ public readonly struct Fraction
         => new(a.num * b.den + b.num * a.den, a.den * b.den);
 
     public static Fraction operator -(Fraction a, Fraction b)
-        => a + (-b);
+        => a + -b;
 
     public static Fraction operator *(Fraction a, Fraction b)
         => new(a.num * b.num, a.den * b.den);

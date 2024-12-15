@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
+using TwentyTwentyFour.Utils;
 
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Day14;
 
 public record Robot(Point Position, Point Velocity);
 
@@ -33,8 +34,8 @@ public class DayFourteen
             .Select(robot => robot.Position)
             .GroupBy(position => Math.Abs(position.X.CompareTo(xLine) * position.Y.CompareTo(yLine))
                 * (1
-                    | (position.X.CompareTo(xLine).CompareTo(-1) << 1)
-                    | (position.Y.CompareTo(yLine).CompareTo(-1) << 2)))
+                    | position.X.CompareTo(xLine).CompareTo(-1) << 1
+                    | position.Y.CompareTo(yLine).CompareTo(-1) << 2))
             .OrderByDescending(group => group.Key)
             .Take(4)
             .Aggregate(1, (agg, group) => agg * group.Count());

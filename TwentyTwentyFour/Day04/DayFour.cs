@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
-using Xunit.Sdk;
 
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Day04;
 
 public class DayFour
 {

@@ -1,6 +1,8 @@
-namespace TwentyTwentyFour;
+using TwentyTwentyFour.Utils;
 
-public static class DaySixExtensions
+namespace TwentyTwentyFour.Day06;
+
+public static class Extensions
 {
     public static IEnumerable<TResult> AsRange<TResult>(this Func<TResult, TResult> transform, TResult seed, int count)
     {

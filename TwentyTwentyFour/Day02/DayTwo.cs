@@ -1,7 +1,4 @@
-using System.Windows.Markup;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Day02;
 
 public class DayTwo
 {

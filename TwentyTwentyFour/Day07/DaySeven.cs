@@ -1,4 +1,4 @@
-namespace TwentyTwentyFour;
+namespace TwentyTwentyFour.Day07;
 
 public class DaySeven
 {
