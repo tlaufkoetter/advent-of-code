@@ -2,22 +2,6 @@ using TwentyTwentyFour.Utils;
 
 namespace TwentyTwentyFour.Day06;
 
-public static class Extensions
-{
-    public static IEnumerable<TSource> TakeWhileIncluding<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
-    {
-        var enumerator = source.GetEnumerator();
-        var whytho = Enumerable.Repeat(false, int.MaxValue)
-            .TakeWhile(_ => enumerator.MoveNext())
-            .Select(_ => enumerator.Current)
-            .TakeWhile(predicate);
-
-        return whytho.Concat(Enumerable.Repeat(false, 1)
-            .TakeWhile(_ => enumerator.MoveNext())
-            .Select(_ => enumerator.Current));
-    }
-}
-
 public class DaySix
 {
     public record InputData(Guard Guard, HashSet<Point> Obstacles, Point MapDimensions);
