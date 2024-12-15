@@ -3,7 +3,7 @@ using TwentyTwentyFour.Utils;
 
 namespace TwentyTwentyFour.Day15;
 
-public record Input(Point Robot, Point[] Boxes, Point[] Walls, Point[] Moves);
+public record Input(WidePoint Robot, WidePoint[] Boxes, WidePoint[] Walls, Point[] Moves);
 
 
 
@@ -15,7 +15,7 @@ public class DayFifteen
             .Split("\n\n").ToArray();
         var mapDict = split[0].Split('\n')
             .SelectMany((row, y) => row
-                .Select((c, x) => new { Character = c, Position = new Point(x, y) }))
+                .Select((c, x) => new { Character = c, Position = new WidePoint([x], y) }))
             .ToLookup(cell => cell.Character, cell => cell.Position);
 
         var moveDict = new Dictionary<char, Point> {
@@ -27,9 +27,9 @@ public class DayFifteen
         return new Input(mapDict['@'].Single(), mapDict['O'].ToArray(), mapDict['#'].ToArray(), split[1].Split('\n').SelectMany(line => line.Select(c => moveDict[c])).ToArray());
     }
 
-    private static long CalculatSumOfAllBoxes(IEnumerable<Point> boxes)
+    private static long CalculatSumOfAllBoxes(IEnumerable<WidePoint> boxes)
     {
-        return boxes.Sum(box => box.Y * 100 + box.X);
+        return boxes.Sum(box => box.Y * 100 + box.Xs.Min());
     }
 
     private static Input Move(Input state, Point move)
@@ -38,11 +38,11 @@ public class DayFifteen
         var boxesState = state.Boxes.ToHashSet();
         var affectedTiles = Enumerable.Range(0, int.MaxValue)
             .Select(i => newRobot + move * i)
-            .TakeWhileIncluding(boxesState.Contains).ToList();
+            .TakeWhileIncluding(boxesState.WideContains).ToList();
         var affectedBoxes = affectedTiles.SkipLast(1).ToList();
-        var newBoxes = boxesState.Except(affectedBoxes).Concat(affectedBoxes.Select(box => box + move)).ToArray();
+        var newBoxes = boxesState.WideExcept(affectedBoxes).Concat(affectedBoxes.Select(box => box + move)).ToArray();
 
-        return new Input[] { state with { Robot = newRobot, Boxes = newBoxes }, state }.ElementAt(affectedTiles.TakeLast(1).Count(state.Walls.Contains));
+        return new Input[] { state with { Robot = newRobot, Boxes = newBoxes }, state }.ElementAt(affectedTiles.TakeLast(1).Count(state.Walls.WideContains));
     }
 
     [Theory]

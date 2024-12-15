@@ -30,5 +30,26 @@ namespace TwentyTwentyFour.Utils
                 .TakeWhile(_ => areElementsLeft)
                 .Select(_ => enumerator.Current));
         }
+
+        public static IEnumerable<Point> AsPoints(this WidePoint point)
+        {
+            return point.Xs.Select(x => new Point(x, point.Y));
+        }
+        public static bool WideContains(this HashSet<WidePoint> source, WidePoint value)
+        {
+            var points = source.SelectMany(point => point.AsPoints()).ToHashSet();
+            return value.AsPoints().Any(points.Contains);
+        }
+
+        public static bool WideContains(this IEnumerable<WidePoint> source, WidePoint value)
+        {
+            return source.ToHashSet().WideContains(value);
+        }
+
+        public static IEnumerable<WidePoint> WideExcept(this IEnumerable<WidePoint> source, IEnumerable<WidePoint> values)
+        {
+            var points = values.SelectMany(point => point.AsPoints()).ToHashSet();
+            return source.Where(point => point.AsPoints().All(p => !points.Contains(p)));
+        }
     }
 }

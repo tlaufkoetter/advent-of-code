@@ -39,3 +39,16 @@ public readonly struct Point(long x, long y) : IComparable<Point>
         return new int[] { X.CompareTo(other.X), Y.CompareTo(other.Y) }.Where(c => c != 0).Order().FirstOrDefault(0);
     }
 }
+
+public record WidePoint(long[] Xs, long Y)
+{
+    public static WidePoint operator +(WidePoint a, Point b)
+    {
+        return new WidePoint(a.Xs.Select(x => x + b.X).ToArray(), a.Y + b.Y);
+    }
+
+    public override string ToString()
+    {
+        return $"(({string.Join(',', Xs)}),{Y})";
+    }
+}
