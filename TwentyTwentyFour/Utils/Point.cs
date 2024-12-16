@@ -47,8 +47,33 @@ public record WidePoint(long[] Xs, long Y)
         return new WidePoint(a.Xs.Select(x => x + b.X).ToArray(), a.Y + b.Y);
     }
 
+    public static WidePoint operator -(WidePoint a, WidePoint b)
+    {
+        return new WidePoint(a.Xs.Zip(b.Xs).Select(p => p.First - p.Second).ToArray(), a.Y - b.Y);
+    }
+
     public override string ToString()
     {
         return $"(({string.Join(',', Xs)}),{Y})";
+    }
+}
+
+public static class WidePointExtensions
+{
+    public static IEnumerable<Point> AsSinglePoints(this WidePoint point)
+    {
+        return point.Xs.Select(x => new Point(x, point.Y));
+    }
+
+    public static bool WideContains(this IEnumerable<WidePoint> source, WidePoint value)
+    {
+        var points = source.SelectMany(point => point.AsSinglePoints()).ToHashSet();
+        return points.Intersect(value.AsSinglePoints().ToHashSet()).Any();
+    }
+
+    public static IEnumerable<WidePoint> WideExcept(this IEnumerable<WidePoint> source, IEnumerable<WidePoint> values)
+    {
+        var points = values.SelectMany(point => point.AsSinglePoints()).ToHashSet();
+        return source.Where(point => point.AsSinglePoints().All(p => !points.Contains(p)));
     }
 }

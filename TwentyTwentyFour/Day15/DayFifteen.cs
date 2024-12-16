@@ -1,4 +1,3 @@
-using TwentyTwentyFour.Day06;
 using TwentyTwentyFour.Utils;
 
 namespace TwentyTwentyFour.Day15;
@@ -32,17 +31,45 @@ public class DayFifteen
         return boxes.Sum(box => box.Y * 100 + box.Xs.Min());
     }
 
-    private static Input Move(Input state, Point move)
+    private static Input Move(Input state, Point move, HashSet<Point> wallPoints)
     {
-        var newRobot = state.Robot + move;
-        var boxesState = state.Boxes.ToHashSet();
-        var affectedTiles = Enumerable.Range(0, int.MaxValue)
-            .Select(i => newRobot + move * i)
-            .TakeWhileIncluding(boxesState.WideContains).ToList();
-        var affectedBoxes = affectedTiles.SkipLast(1).ToList();
-        var newBoxes = boxesState.WideExcept(affectedBoxes).Concat(affectedBoxes.Select(box => box + move)).ToArray();
+        var boxesState = state.Boxes.ToList();
+        var boxLookup = boxesState
+            .SelectMany(box => box
+                .AsSinglePoints()
+                .Select(point => (point, box)))
+            .ToLookup(pair => pair.point, pair => pair.box);
+        var affectedBoxes = Enumerable.Range(0, int.MaxValue)
+            .AggregateList(new List<WidePoint> { state.Robot }, (agg, _) =>
+            {
+                var current = agg.SelectMany(point => point.AsSinglePoints()).ToHashSet();
+                return agg
+                    .Select(point => point + move)
+                    .SelectMany(point => point.AsSinglePoints())
+                    .Where(point => !current.Contains(point))
+                    .SelectMany(point => boxLookup[point])
+                    .ToList();
+            })
+            .Skip(1)
+            .TakeWhile(boxes => boxes.Count > 0)
+            .SelectMany(x => x)
+            .ToList();
+        affectedBoxes = affectedBoxes.Distinct().ToList();
+        var unaffectedBoxes = boxesState
+            .Where(box => !affectedBoxes.WideContains(box)).ToList();
+        var newBoxes = unaffectedBoxes.Concat(affectedBoxes.Select(box => box + move)).ToArray();
 
-        return new Input[] { state with { Robot = newRobot, Boxes = newBoxes }, state }.ElementAt(affectedTiles.TakeLast(1).Count(state.Walls.WideContains));
+        var newRobot = state.Robot + move;
+        var result = new Input[] {
+                state with { Robot = newRobot, Boxes = newBoxes },
+                state }
+            .ElementAt(Convert.ToInt32(newBoxes
+                .Append(newRobot)
+                .SelectMany(p => p
+                    .AsSinglePoints())
+                .ToHashSet()
+                .Intersect(wallPoints).Any()));
+        return result;
     }
 
     [Theory]
@@ -52,6 +79,39 @@ public class DayFifteen
     public void Part1(string file, long expected)
     {
         var input = GetInput(file);
-        Assert.Equal(expected, CalculatSumOfAllBoxes(input.Moves.Aggregate(input, Move).Boxes));
+        var wallPoints = input.Walls.SelectMany(w => w.AsSinglePoints()).ToHashSet();
+        var result = input.Moves.Aggregate(input with { Moves = [], Walls = [] }, (agg, i) => Move(agg, i, wallPoints));
+        Assert.Equal(expected, CalculatSumOfAllBoxes(result.Boxes));
+    }
+
+    public static WidePoint Translate(WidePoint point)
+    {
+        return point with { Xs = [point.Xs[0] * 2] };
+    }
+
+    public static WidePoint[] Widen(WidePoint[] points)
+    {
+        return points.Select(Translate).Select(point => point with { Xs = [point.Xs[0], point.Xs[0] + 1] }).ToArray();
+    }
+
+    public static Input Widen(Input input)
+    {
+        return input with
+        {
+            Robot = Translate(input.Robot),
+            Boxes = Widen(input.Boxes),
+            Walls = Widen(input.Walls)
+        };
+    }
+
+    [Theory]
+    [InlineData(["../../../Day15/Example2.txt", 9021])]
+    [InlineData(["../../../Day15/Challenge.txt", 1457703])]
+    public void Part2(string file, long expected)
+    {
+        var input = Widen(GetInput(file));
+        var wallPoints = input.Walls.SelectMany(w => w.AsSinglePoints()).ToHashSet();
+        var result = input.Moves.Aggregate(input with { Moves = [] }, (agg, i) => Move(agg, i, wallPoints));
+        Assert.Equal(expected, CalculatSumOfAllBoxes(result.Boxes));
     }
 }

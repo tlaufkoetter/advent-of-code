@@ -13,6 +13,17 @@ namespace TwentyTwentyFour.Utils
             .Prepend(seed);
         }
 
+        public static IEnumerable<TResult> AggregateList<TResult, TSource>(this IEnumerable<TSource> source, TResult seed, Func<TResult, TSource, TResult> transform)
+        {
+            var current = seed;
+            return source.Select(s =>
+            {
+                current = transform(current, s);
+                return current;
+            })
+            .Prepend(seed);
+        }
+
         public static IEnumerable<TSource> TakeWhileIncluding<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
             var enumerator = source.GetEnumerator();
@@ -29,27 +40,6 @@ namespace TwentyTwentyFour.Utils
             return whytho.Concat(Enumerable.Repeat(false, 1)
                 .TakeWhile(_ => areElementsLeft)
                 .Select(_ => enumerator.Current));
-        }
-
-        public static IEnumerable<Point> AsPoints(this WidePoint point)
-        {
-            return point.Xs.Select(x => new Point(x, point.Y));
-        }
-        public static bool WideContains(this HashSet<WidePoint> source, WidePoint value)
-        {
-            var points = source.SelectMany(point => point.AsPoints()).ToHashSet();
-            return value.AsPoints().Any(points.Contains);
-        }
-
-        public static bool WideContains(this IEnumerable<WidePoint> source, WidePoint value)
-        {
-            return source.ToHashSet().WideContains(value);
-        }
-
-        public static IEnumerable<WidePoint> WideExcept(this IEnumerable<WidePoint> source, IEnumerable<WidePoint> values)
-        {
-            var points = values.SelectMany(point => point.AsPoints()).ToHashSet();
-            return source.Where(point => point.AsPoints().All(p => !points.Contains(p)));
         }
     }
 }
