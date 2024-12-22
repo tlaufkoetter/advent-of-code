@@ -12,16 +12,13 @@ public class DayTen
             .ToDictionary();
     }
 
-    [Theory]
-    [InlineData(["../../../Day10/Example.txt", 36])]
-    [InlineData(["../../../Day10/Challenge.txt", 593])]
-    public void Part1(string filePath, long expected)
+    private static IEnumerable<List<Point>> GetTrails(string filePath)
     {
         var input = GetInput(filePath);
         List<Point> ways = [new(0, 1), new(0, -1), new(1, 0), new(-1, 0)];
         var max = input.Keys.Max();
         var min = input.Keys.Min();
-        var trails = Enumerable.Range(1, 9)
+        return Enumerable.Range(1, 9)
             .Aggregate(input.Where(kvp => kvp.Value == 0).Select(s => new List<Point> { s.Key }), (currentTrails, next) =>
                 currentTrails
                     .SelectMany(current => ways
@@ -30,12 +27,28 @@ public class DayTen
                         .Where(p => p.Y <= max.Y)
                         .Where(p => p.X >= min.X)
                         .Where(p => p.Y >= min.Y)
-                        .Select(p => new HikingPoint(p, input[p]))
-                        .Where(p => p.Value == next)
-                        .Select(nextP => current.Append(nextP.Position).ToList()))
-                    .DistinctBy(current => (current.First(), current.Last()))
-            )
-            .Select(look => look.First())
+                        .Where(p => input[p] == next)
+                        .Select(nextP => current.Append(nextP).ToList()))
+            );
+    }
+
+    [Theory]
+    [InlineData(["../../../Day10/Example.txt", 36])]
+    [InlineData(["../../../Day10/Challenge.txt", 593])]
+    public void Part1(string filePath, long expected)
+    {
+        var trails = GetTrails(filePath)
+            .DistinctBy(current => (current.First(), current.Last()))
+            .ToList();
+        Assert.Equal(expected, trails.Count);
+    }
+
+    [Theory]
+    [InlineData(["../../../Day10/Example.txt", 81])]
+    [InlineData(["../../../Day10/Challenge.txt", 1192])]
+    public void Part2(string filePath, long expected)
+    {
+        var trails = GetTrails(filePath)
             .ToList();
         Assert.Equal(expected, trails.Count);
     }
