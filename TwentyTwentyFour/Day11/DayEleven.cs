@@ -30,11 +30,24 @@ public class DayEleven
     [InlineData(["../../../Day11/Challenge.txt", 197357])]
     public void Part1(string file, long expected)
     {
-        var count = new Func<IEnumerable<long>, IEnumerable<long>>(agg =>
-                agg.SelectMany(TransformStone)
-            ).AsRange(GetInput(file), 25)
-            .Last().Count();
+        var count = GetCount(file, 25);
         Assert.Equal(expected, count);
 
+    }
+
+    private static int GetCount(string file, int blinks)
+    {
+        return new Func<IEnumerable<long>, IEnumerable<long>>(agg =>
+                        agg.SelectMany(TransformStone)
+                    ).AsRange(GetInput(file), blinks)
+                    .Last().Count();
+    }
+
+    [Theory]
+    [InlineData(["../../../Day11/Challenge.txt", 0])]
+    public void Part2(string file, long expected)
+    {
+        var count = GetCount(file, 75);
+        Assert.Equal(expected, count);
     }
 }
