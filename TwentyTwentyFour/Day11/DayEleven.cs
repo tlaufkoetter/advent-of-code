@@ -27,6 +27,7 @@ public class DayEleven
 
     [Theory]
     [InlineData(["../../../Day11/Example.txt", 55312])]
+    [InlineData(["../../../Day11/Challenge.txt", 197357])]
     public void Part1(string file, long expected)
     {
         var count = new Func<IEnumerable<long>, IEnumerable<long>>(agg =>
