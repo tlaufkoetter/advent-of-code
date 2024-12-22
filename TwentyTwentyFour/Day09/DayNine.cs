@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using TwentyTwentyFour.Utils;
 
 namespace TwentyTwentyFour.Day09
 {
@@ -36,10 +38,12 @@ namespace TwentyTwentyFour.Day09
             return indices.Select((n, i) => (n ?? 0) * i).Sum()!;
         }
 
-        [Fact]
-        public void TestCheckSum()
+        [Theory]
+        [InlineData(1928L, 0L, 0L, 9L, 9L, 8L, 1L, 1L, 1L, 8L, 8L, 8L, 2L, 7L, 7L, 7L, 3L, 3L, 3L, 6L, 4L, 4L, 6L, 5L, 5L, 5L, 5L, 6L, 6L)]
+        [InlineData(2858L, 0L, 0L, 9L, 9L, 2L, 1L, 1L, 1L, 7L, 7L, 7L, null, 4L, 4L, null, 3L, 3L, 3L, null, null, null, null, 5L, 5L, 5L, 5L, null, 6L, 6L, 6L, 6L, null, null, null, null, null, 8L, 8L, 8L, 8L, null, null)]
+        public void TestCheckSum(long expected, params long?[] array)
         {
-            Assert.Equal(1928, CalculateCheckSum([0, 0, 9, 9, 8, 1, 1, 1, 8, 8, 8, 2, 7, 7, 7, 3, 3, 3, 6, 4, 4, 6, 5, 5, 5, 5, 6, 6]));
+            Assert.Equal(expected, CalculateCheckSum(array));
         }
 
         private static long?[] DefragArray(long?[] data)
@@ -57,6 +61,85 @@ namespace TwentyTwentyFour.Day09
                         .TakeWhile(_ => pair.Second.i > pair.First),
                     ]).ToList();
             return [.. defragged, .. data.Skip(defragged.Count).Take(data.Where(n => n != null).Count() - defragged.Count)];
+        }
+
+        private static List<List<int>> FindEmptySpaces(long?[] data)
+        {
+            return data.Select((n, i) => (n, i))
+                            .Where(p => p.n == null)
+                            .Select(p => p.i)
+                            .Aggregate(new List<List<int>>() { new() { -2 } }, (agg, i) =>
+                                agg
+                                    .SkipLast(1)
+                                    .Concat(agg
+                                        .TakeLast(1)
+                                        .Select(last => last
+                                            .Concat(last
+                                                .TakeLast(1)
+                                                .Where(l => l == i - 1)
+                                                .Select(_ => i)).ToList()))
+                                    .Concat(agg
+                                        .TakeLast(1)
+                                        .Where(last => !last
+                                            .Contains(i - 1))
+                                        .Select(_ => new List<int> { i })
+                                    ).ToList())
+                            .Skip(1).ToList();
+        }
+
+
+        private static long?[] DefragArrayWholeFiles(long?[] data)
+        {
+            var fileSpaces = data.Select((n, i) => (n, i))
+                .Where(p => p.n != null)
+                .Aggregate(new List<List<(long, int)>>() { new() { (0, -2) } }, (agg, pair) =>
+                    agg
+                        .SkipLast(1)
+                        .Concat(agg
+                            .TakeLast(1)
+                            .Select(last => last
+                                .Concat(last
+                                    .TakeLast(1)
+                                    .Where(l => l.Item2 == pair.i - 1 && l.Item1 == pair.n)
+                                    .Select(_ => (pair.n ?? 0, pair.i)))
+                                    .ToList())
+                            .ToList())
+                        .Concat(agg
+                            .TakeLast(1)
+                            .Where(last => !last
+                                .Contains((pair.n ?? 0, pair.i - 1)))
+                            .Select(_ => new List<(long, int)> { (pair.n ?? 0, pair.i) })
+                        ).ToList())
+                .Skip(1).ToList();
+            return fileSpaces.AsEnumerable()
+                .Reverse()
+                .AggregateList(new { Data = data, EmptySpaces = FindEmptySpaces(data) }, (agg, space) =>
+                {
+                    var freeSpace = agg.EmptySpaces.Select((sp, i) => new { Index = i, Spaces = sp }).Where(es => es.Spaces.Count >= space.Count).Where(s => s.Spaces[0] < space[0].Item2).Take(1).ToList();
+                    freeSpace.SelectMany(_ => space.Select(s => (long?)s.Item1)).ToArray().CopyTo(agg.Data, freeSpace.FirstOrDefault()?.Spaces[0] ?? 0);
+                    freeSpace.SelectMany(_ => space).Select(s => (long?)null).ToArray().CopyTo(agg.Data, space.FirstOrDefault().Item2);
+                    var newEmptySpaces = freeSpace
+                        .Select(fs => fs with { Spaces = fs.Spaces.Skip(space.Count).ToList() })
+                        .Select(fs => agg
+                            .EmptySpaces
+                            .Take(fs.Index)
+                            .Concat(fs.Spaces
+                                .Select(_ => fs.Spaces).Take(1))
+                            .Concat(agg.EmptySpaces.Skip(fs.Index + 1)).ToList())
+                        .Append(agg.EmptySpaces)
+                        .First();
+                    return agg with { EmptySpaces = newEmptySpaces };
+                })
+                .Last().Data;
+
+        }
+
+        [Fact]
+        public void DefragArrayWholeFilesTest()
+        {
+            long?[] expected = [0, 0, 9, 9, 2, 1, 1, 1, 7, 7, 7, null, 4, 4, null, 3, 3, 3, null, null, null, null, 5, 5, 5, 5, null, 6, 6, 6, 6, null, null, null, null, null, 8, 8, 8, 8, null, null];
+            var result = DefragArrayWholeFiles([0, 0, null, null, null, 1, 1, 1, null, null, null, 2, null, null, null, 3, 3, 3, null, 4, 4, null, 5, 5, 5, 5, null, 6, 6, 6, 6, null, 7, 7, 7, null, 8, 8, 8, 8, 9, 9]);
+            Assert.Equal(expected, result);
         }
 
         [Fact]
@@ -89,6 +172,14 @@ namespace TwentyTwentyFour.Day09
         public void Part1(string fileName, long expected)
         {
             Assert.Equal(expected, CalculateCheckSum(DefragArray(ToDataArray(GetInput(fileName)))));
+        }
+
+        [Theory]
+        [InlineData(["../../../Day09/Example.txt", 2858])]
+        [InlineData(["../../../Day09/Challenge.txt", 6311837662089])]
+        public void Part2(string fileName, long expected)
+        {
+            Assert.Equal(expected, CalculateCheckSum(DefragArrayWholeFiles(ToDataArray(GetInput(fileName)))));
         }
     }
 }
