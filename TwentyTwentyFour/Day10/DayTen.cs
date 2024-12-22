@@ -14,6 +14,7 @@ public class DayTen
 
     [Theory]
     [InlineData(["../../../Day10/Example.txt", 36])]
+    [InlineData(["../../../Day10/Challenge.txt", 593])]
     public void Part1(string filePath, long expected)
     {
         var input = GetInput(filePath);
