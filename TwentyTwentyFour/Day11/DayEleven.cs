@@ -1,11 +1,83 @@
-using System.Collections.Concurrent;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using TwentyTwentyFour.Utils;
-using Xunit.Sdk;
-
 namespace TwentyTwentyFour.Day11;
+
+public class TreeRoot(IEnumerable<long> originalValues, Dictionary<long, TreeNode> cache)
+{
+    private readonly List<TreeNode> children = originalValues.Select(val => new TreeNode(val, cache)).ToList();
+    public long Transform(int blinks)
+    {
+        return children.Sum(child => child.Transform(blinks));
+    }
+}
+
+public class TreeNode
+{
+    public TreeNode(long originalValue, Dictionary<long, TreeNode> cache)
+    {
+        this.cache = cache;
+        this.originalValue = originalValue;
+        cache[originalValue] = this;
+    }
+    private readonly Dictionary<long, TreeNode> cache;
+
+    private readonly long originalValue;
+    private readonly List<TreeNode> children = [];
+
+    private readonly Dictionary<int, long> countCache = [];
+
+    private void AddChild(long value)
+    {
+        if (cache.TryGetValue(value, out var node))
+        {
+            children.Add(node);
+        }
+        else
+        {
+            children.Add(new TreeNode(value, cache));
+        }
+    }
+
+    public long Transform(int blinks)
+    {
+        if (blinks == 0)
+        {
+            return 1;
+        }
+
+        if (children.Count > 0)
+        {
+            if (blinks == 1)
+            {
+                return children.Count;
+            }
+
+            if (countCache.TryGetValue(blinks, out var cachedCount))
+            {
+                return cachedCount;
+            }
+
+            var childrenCount = children.Sum(child => child.Transform(blinks - 1));
+            countCache[blinks] = childrenCount;
+            return childrenCount;
+        }
+
+        var digits = (long)Math.Floor(Math.Log10(originalValue) + 1);
+        if (originalValue == 0)
+        {
+            AddChild(1);
+        }
+        else if (digits % 2 == 0)
+        {
+            var den = (long)Math.Pow(10, digits / 2);
+            AddChild(originalValue % den);
+            AddChild(originalValue / den);
+        }
+        else
+        {
+            AddChild(originalValue * 2024);
+        }
+        return Transform(blinks);
+    }
+}
 
 public class DayEleven
 {
@@ -17,26 +89,9 @@ public class DayEleven
             .ToList();
     }
 
-    private static IEnumerable<long> TransformStone(long stone)
+    private static long GetCount(string file, int blinks)
     {
-        if (stone == 0)
-        {
-            yield return 1;
-        }
-        else
-        {
-            var digits = (long)Math.Floor(Math.Log10(stone) + 1);
-            if (digits % 2 == 0)
-            {
-                var den = (long)Math.Pow(10, digits / 2);
-                yield return stone % den;
-                yield return stone / den;
-            }
-            else
-            {
-                yield return stone * 2024;
-            }
-        }
+        return new TreeRoot(GetInput(file), []).Transform(blinks);
     }
 
     [Theory]
@@ -48,97 +103,8 @@ public class DayEleven
         Assert.Equal(expected, count);
     }
 
-    public interface ITreeNode
-    {
-        long Count(int depth);
-        long Transform(int blinks);
-    }
-
-    public class TreeRoot(IEnumerable<long> originalValues, Dictionary<long, TreeNode> cache) : ITreeNode
-    {
-        List<TreeNode> children = originalValues.Select(val => new TreeNode(val, cache)).ToList();
-        public long Count(int depth)
-        {
-            return children.Sum(child => child.Count(depth));
-        }
-
-        public long Transform(int blinks)
-        {
-            return children.Sum(child => child.Transform(blinks));
-        }
-    }
-
-    public class TreeNode(long originalValue, Dictionary<long, TreeNode> cache) : ITreeNode
-    {
-        private Dictionary<long, TreeNode> cache = cache;
-        private long originalValue = originalValue;
-        public long OriginalValue { get; } = originalValue;
-        private List<TreeNode> children = [];
-
-        public long Count(int depth)
-        {
-            if (depth == 0 || children.Count == 0)
-            {
-                return 1;
-            }
-
-            return children.Sum(child => child.Count(depth - 1));
-        }
-
-        private void AddChild(TreeNode node)
-        {
-            if (cache.TryAdd(node.OriginalValue, node))
-            {
-                children.Add(node);
-            }
-            else
-            {
-                children.Add(cache[node.OriginalValue]);
-            }
-        }
-
-        public long Transform(int blinks)
-        {
-            if (blinks == 0)
-            {
-                return 1;
-            }
-
-            if (children.Count > 0)
-            {
-                return children.Sum(child => child.Transform(blinks - 1));
-            }
-
-            var digits = (long)Math.Floor(Math.Log10(OriginalValue) + 1);
-            if (originalValue == 0)
-            {
-                AddChild(new TreeNode(1, cache));
-            }
-            else if (digits % 2 == 0)
-            {
-                var den = (long)Math.Pow(10, digits / 2);
-                AddChild(new TreeNode(OriginalValue % den, cache));
-                AddChild(new TreeNode(OriginalValue / den, cache));
-            }
-            else
-            {
-                AddChild(new TreeNode(OriginalValue * 2024, cache));
-            }
-            return Transform(blinks);
-        }
-    }
-
-    private static long GetCount(string file, int blinks)
-    {
-        var input = GetInput(file);
-        var stones = input.OrderDescending();
-        var root = new TreeRoot(stones, []);
-        return root.Transform(blinks);
-    }
-
     [Theory]
-    [InlineData(["../../../Day11/Example.txt", 55312])]
-    [InlineData(["../../../Day11/Challenge.txt", 0])]
+    [InlineData(["../../../Day11/Challenge.txt", 234568186890978])]
     public void Part2(string file, long expected)
     {
         var count = GetCount(file, 75);
