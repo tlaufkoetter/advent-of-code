@@ -24,58 +24,51 @@ public class TreeNode
 
     private readonly Dictionary<int, long> countCache = [];
 
-    private void AddChild(long value)
+    private void AddChildren(IEnumerable<long> values)
     {
-        if (cache.TryGetValue(value, out var node))
-        {
-            children.Add(node);
-        }
-        else
-        {
-            children.Add(new TreeNode(value, cache));
-        }
+        Func<long, TreeNode>[] results = [
+            value => new TreeNode(value, cache),
+            value => cache[value]
+        ];
+        children.AddRange(values
+            .Select(value => results[Convert.ToInt32(cache.ContainsKey(value))](value)));
     }
 
     public long Transform(int blinks)
     {
-        if (blinks == 0)
-        {
-            return 1;
-        }
-
-        if (children.Count > 0)
-        {
-            if (blinks == 1)
-            {
-                return children.Count;
+        Func<long>[] results = [
+            () => 1L,
+            () => {
+                Func<long>[] results = [
+                    () => children.Count,
+                    () => countCache[blinks],
+                    () => {
+                        var childrenCount = children.Sum(child => child.Transform(blinks - 1));
+                        countCache[blinks] = childrenCount;
+                        return childrenCount;
+                    }
+                ];
+                var index = blinks.CompareTo(1);
+                index *= index + (1 - Convert.ToInt32(countCache.ContainsKey(blinks)));
+                return results[index]();
+            },
+            () => {
+                var digits = (long)Math.Floor(Math.Log10(originalValue) + 1);
+                var index = originalValue.CompareTo(0);
+                index *= index + (1 - Convert.ToInt32(digits % 2 == 0));
+                Func<long[]>[] results = [
+                    () => [1],
+                    () => {
+                        var den = (long)Math.Pow(10, digits / 2);
+                        return [originalValue % den, originalValue / den];
+                    },
+                    () => [originalValue * 2024]
+                ];
+                AddChildren(results[index]());
+                return Transform(blinks);
             }
-
-            if (countCache.TryGetValue(blinks, out var cachedCount))
-            {
-                return cachedCount;
-            }
-
-            var childrenCount = children.Sum(child => child.Transform(blinks - 1));
-            countCache[blinks] = childrenCount;
-            return childrenCount;
-        }
-
-        var digits = (long)Math.Floor(Math.Log10(originalValue) + 1);
-        if (originalValue == 0)
-        {
-            AddChild(1);
-        }
-        else if (digits % 2 == 0)
-        {
-            var den = (long)Math.Pow(10, digits / 2);
-            AddChild(originalValue % den);
-            AddChild(originalValue / den);
-        }
-        else
-        {
-            AddChild(originalValue * 2024);
-        }
-        return Transform(blinks);
+        ];
+        return results[1 - children.Count.CompareTo(0) + blinks.CompareTo(0)]();
     }
 }
 
